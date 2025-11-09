@@ -35,14 +35,14 @@ if use_second_city:
 
 def load_city_data(city):
     if city == placeholder:
-        return None, None, None
+        return None, None, None, None
     folder = data_dir / city
-    listings = load_and_clean_listings(folder / "listings.csv")
+    listings, msg = load_and_clean_listings(folder / "listings.csv")
     geo_df, geo_json = load_and_clean_neighbourhoods(folder)
-    return listings, geo_df, geo_json
+    return listings, geo_df, geo_json, msg
 
-city1_listings, city1_geo_df, city1_geojson = load_city_data(selected_city_1)
-city2_listings, city2_geo_df, city2_geojson = load_city_data(selected_city_2) if selected_city_2 else (None, None, None)
+city1_listings, city1_geo_df, city1_geojson, city1_msg = load_city_data(selected_city_1)
+city2_listings, city2_geo_df, city2_geojson, city2_msg = load_city_data(selected_city_2) if selected_city_2 else (None, None, None, None)
 
 use_euro = st.sidebar.checkbox("Preise in Euro anzeigen", value=True)
 if use_euro:
@@ -58,6 +58,12 @@ tab_preise, tab_karte = st.tabs(["Preise", "Karte"])
 
 with tab_preise:
     st.header("Preise")
+
+    if city1_msg:
+        st.warning(city1_msg)
+    if city2_msg:
+        st.warning(city2_msg)
+
     col1, col2 = st.columns(2)
 
     def filter_extreme_prices(df: pd.DataFrame, multiplier: float = 40) -> tuple[pd.DataFrame, float]:

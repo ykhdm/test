@@ -11,11 +11,10 @@ def list_cities(data_dir: Path) -> list:
     """Gibt eine sortierte Liste der Städte (Unterordner) zurück."""
     return sorted([p.name for p in data_dir.iterdir() if p.is_dir()]) if data_dir.exists() else []
 
-def load_and_clean_listings(listings_file: Path) -> pd.DataFrame | None:
-    """Lädt listings.csv und bereinigt sie."""
+def load_and_clean_listings(listings_file: Path) -> tuple[pd.DataFrame | None, str | None]:
+    """Lädt listings.csv und bereinigt sie. Gibt zusätzlich eine Meldung zurück, falls keine Preisdaten vorhanden sind."""
     if not listings_file.exists():
-        print(f"Datei nicht gefunden: {listings_file}")
-        return None
+        return None, f"Datei nicht gefunden: {listings_file.name}"
     df = pd.read_csv(listings_file)
     used_columns = [
         "neighbourhood_group", "neighbourhood",
@@ -23,11 +22,14 @@ def load_and_clean_listings(listings_file: Path) -> pd.DataFrame | None:
         "room_type", "price", "minimum_nights"
     ]
     df = df[[col for col in used_columns if col in df.columns]].copy()
+    if "price" not in df.columns or df["price"].dropna().empty:
+        city_name = listings_file.parent.name
+        return None, f"Es sind keine Preise für **{city_name}** vorhanden."
     df_clean = df[~df['price'].isna()].copy()
     ng_col, n_col = "neighbourhood_group", "neighbourhood"
     df_clean[ng_col] = df_clean[ng_col].fillna(df_clean[n_col])
-    
-    return df_clean.reset_index(drop=True)
+    return df_clean.reset_index(drop=True), None
+
 
 def load_and_clean_neighbourhoods(city_folder: Path) -> tuple[pd.DataFrame | None, dict | None]:
     """Lädt neighbourhoods.geojson und wandelt sie in ein DataFrame um."""
