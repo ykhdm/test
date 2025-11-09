@@ -14,6 +14,7 @@ def list_cities(data_dir: Path) -> list:
 def load_and_clean_listings(listings_file: Path) -> pd.DataFrame | None:
     """Lädt listings.csv und bereinigt sie."""
     if not listings_file.exists():
+        print(f"Datei nicht gefunden: {listings_file}")
         return None
     df = pd.read_csv(listings_file)
     used_columns = [
@@ -50,7 +51,7 @@ def compute_overview(df: pd.DataFrame) -> pd.DataFrame:
     })
 
 def compute_room_type_stats(df: pd.DataFrame) -> pd.DataFrame:
-    '''Berechnet Preisstatistiken nach Zimmertyp.'''
+    """Berechnet Preisstatistiken nach Zimmertyp."""
     return df.groupby("room_type").agg(
         min_price=("price", "min"),
         max_price=("price", "max"),
@@ -59,9 +60,7 @@ def compute_room_type_stats(df: pd.DataFrame) -> pd.DataFrame:
     ).reset_index()
 
 def convert_prices_to_euro(df: pd.DataFrame, price_column: str = "price") -> pd.DataFrame:
-    """
-    Wandelt die Preisspalte eines DataFrames von USD in Euro um.
-    """
+    """Wandelt die Preisspalte eines DataFrames von USD in Euro um."""
     df_converted = df.copy()
     response = requests.get("https://api.frankfurter.app/latest?from=USD&to=EUR")
     data = response.json()
