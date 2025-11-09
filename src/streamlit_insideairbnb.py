@@ -141,7 +141,7 @@ with tab_preise:
 with tab_karte:
     st.header("Karte")
 
-    show_heatmap = st.checkbox("Heatmap anzeigen", value=False)
+    show_heatmap = st.checkbox("Heatmap (Preise) anzeigen", value=False)
 
     def prepare_avg_tooltip(listings):
         """Tooltip-Text mit Kennzahlen pro Stadtteil vorbereiten"""
